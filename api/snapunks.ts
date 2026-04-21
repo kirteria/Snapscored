@@ -134,7 +134,7 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
 
   const fid = ctx.action.user.fid ?? 1;
   const imgSrc = `${base}/snapunks/punk/${fid}`;
-  const shareText = `Just claimed my Punk #${fid}! Every FID gets a unique one.\n\nGet yours`;
+  const shareText = `Just claimed my Punk #${fid}! Every FID gets a unique one.\n\nGet yours now!`;
 
   return {
     version: "1.0",
