@@ -405,7 +405,7 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
         title: { type: "text", props: { content: "Claim your Punk", size: "md", weight: "bold", align: "center" } },
         punkImg: { type: "image", props: { url: imgSrc, alt: `Punk #${fid}`, aspect: "1:1" } },
         btnRow: { type: "stack", props: { direction: "horizontal", gap: "sm", justify: "center" }, children: ["shareBtn"] },
-        shareBtn: { type: "button", props: { label: "Share Punk", variant: "primary", icon: "share" }, on: { press: { action: "compose_cast", params: { text: shareText, embeds: [`${base}/snapunks`] } } } },
+        shareBtn: { type: "button", props: { label: "Share Punk", variant: "primary", icon: "share" }, on: { press: { action: "compose_cast", params: { text: shareText, embeds: [`${base}/snapunks/punk/${fid}`] } } } },
       },
     },
   };
