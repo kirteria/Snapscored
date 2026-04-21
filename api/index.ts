@@ -36,15 +36,17 @@ app.get("/", (c) => {
       <div class="info"><h2>SnaPunks</h2><p>Claim your unique generative pixel punk art</p></div>
     </a>
   </div>
-  <footer>Made with 💜 by{' '} 
-     <a href="https://farcaster.xyz/weak"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-purple-500"
-      >
-        Weak
-    </a>
- </footer>
+  <footer>
+  Made with 💜 by{" "}
+  <a
+    href="https://farcaster.xyz/weak"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="no-underline text-[#a259ff] hover:text-[#a259ff]"
+  >
+    Weak
+  </a>
+</footer>
 </body>
 </html>`);
 });
