@@ -36,7 +36,7 @@ app.get("/", (c) => {
       <div class="info"><h2>SnaPunks</h2><p>Claim your unique generative pixel punk art</p></div>
     </a>
   </div>
-  <footer>Made with 💜 by<a href="https://farcaster.xyz/weak" style="color:#a259ff">Weak</a></footer>
+  <footer>Made with 💜 by <a href="https://farcaster.xyz/weak" style="color:#a259ff">Weak</a></footer>
   
 </body>
 </html>`);
