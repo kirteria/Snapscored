@@ -61,7 +61,7 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
           checkBtn: {
             type: "button",
             props: { label: "Check Me", variant: "primary" },
-            on: { press: { action: "submit", params: { target: `${base}/?checked=1` } } },
+            on: { press: { action: "submit", params: { target: `${base}/snapscored?checked=1` } } },
           },
         },
       },
@@ -135,7 +135,7 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
           retryBtn: {
             type: "button",
             props: { label: "Retry", variant: "primary", icon: "refresh-cw" },
-            on: { press: { action: "submit", params: { target: `${base}/?checked=1` } } },
+            on: { press: { action: "submit", params: { target: `${base}/snapscored?checked=1` } } },
           },
         },
       },
