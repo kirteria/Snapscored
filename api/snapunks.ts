@@ -20,9 +20,11 @@ function seededRng(seed: number) {
   let s = seed;
   return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
 }
+
 function pick<T>(arr: readonly T[], rng: () => number): T {
   return arr[Math.floor(rng() * arr.length)];
 }
+
 function hair(style: Hair, color: string, u: number): string {
   switch (style) {
     case "mohawk": return `<rect x="${8*u}" y="0" width="${8*u}" height="${6*u}" fill="${color}" rx="${u}"/><rect x="${10*u}" y="${-2*u}" width="${4*u}" height="${4*u}" fill="${color}"/>`;
@@ -33,6 +35,7 @@ function hair(style: Hair, color: string, u: number): string {
     case "cap": return `<rect x="${4*u}" y="${3*u}" width="${16*u}" height="${4*u}" fill="${color}" rx="${u}"/><rect x="${2*u}" y="${6*u}" width="${5*u}" height="${1.5*u}" fill="${color}"/>`;
   }
 }
+
 function eyes(style: Eye, u: number): string {
   switch (style) {
     case "normal": return `<rect x="${7*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff" rx="${u*.5}"/><rect x="${14*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff" rx="${u*.5}"/><rect x="${8*u}" y="${11*u}" width="${2*u}" height="${2*u}" fill="#222"/><rect x="${15*u}" y="${11*u}" width="${2*u}" height="${2*u}" fill="#222"/>`;
@@ -42,6 +45,7 @@ function eyes(style: Eye, u: number): string {
     case "laser": return `<rect x="${7*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#f22" rx="${u*.5}"/><rect x="${14*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#f22" rx="${u*.5}"/><rect x="0" y="${11*u}" width="${24*u}" height="${1.5*u}" fill="#f22" opacity="0.5"/>`;
   }
 }
+
 function mouth(style: Mouth, u: number): string {
   switch (style) {
     case "smirk": return `<rect x="${9*u}" y="${17*u}" width="${7*u}" height="${2*u}" fill="#c33" rx="${u*.5}"/><rect x="${14*u}" y="${16*u}" width="${2*u}" height="${u}" fill="#c33"/>`;
@@ -50,6 +54,7 @@ function mouth(style: Mouth, u: number): string {
     case "gold": return `<rect x="${9*u}" y="${17*u}" width="${6*u}" height="${2*u}" fill="#c33" rx="${u*.5}"/><rect x="${11*u}" y="${17*u}" width="${2*u}" height="${2*u}" fill="#FFD700"/>`;
   }
 }
+
 function accessory(style: Accessory, u: number): string {
   switch (style) {
     case "chain": return `<rect x="${7*u}" y="${20*u}" width="${10*u}" height="${u}" fill="#c0c0c0" rx="${u*.3}"/><rect x="${11*u}" y="${20*u}" width="${2*u}" height="${2*u}" fill="#FFD700" rx="${u*.5}"/>`;
@@ -72,42 +77,32 @@ function generatePunkSvg(fid: number): string {
   const mouthSt = pick(MOUTH_STYLES, rng);
   const accSt = pick(ACCESSORY_STYLES, rng);
   const shirt = pick(SHIRT_COLORS, rng);
+
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" shape-rendering="crispEdges">
-  <defs><pattern id="g" width="${u}" height="${u}" patternUnits="userSpaceOnUse"><path d="M ${u} 0 L 0 0 0 ${u}" fill="none" stroke="#fff" stroke-width="0.4"/></pattern></defs>
   <rect width="${S}" height="${S}" fill="${bg}"/>
-  <rect width="${S}" height="${S}" fill="url(#g)" opacity="0.04"/>
   <rect x="${3*u}" y="${19*u}" width="${18*u}" height="${5*u}" fill="${shirt}" rx="${u}"/>
   <rect x="${10*u}" y="${17*u}" width="${4*u}" height="${3*u}" fill="${skin}"/>
   <rect x="${5*u}" y="${5*u}" width="${14*u}" height="${13*u}" fill="${skin}" rx="${u}"/>
   ${hair(hairSt, hairCol, u)}
   ${eyes(eyeSt, u)}
-  <rect x="${11*u}" y="${14*u}" width="${2*u}" height="${1.5*u}" fill="${skin}"/>
-  <rect x="${10*u}" y="${15*u}" width="${u}" height="${u}" fill="${skin}" opacity="0.7"/>
-  <rect x="${13*u}" y="${15*u}" width="${u}" height="${u}" fill="${skin}" opacity="0.7"/>
   ${mouth(mouthSt, u)}
   ${accessory(accSt, u)}
-  <rect width="${S}" height="${S}" fill="none" stroke="#ffffff" stroke-width="${u*.3}" opacity="0.15"/>
-</svg>`;
+  </svg>`;
 }
 
 const app = new Hono();
 
 app.get("/punk/:fid", (c) => {
   const fid = parseInt(c.req.param("fid"), 10) || 1;
-  const svg = generatePunkSvg(fid);
-  return c.body(svg, 200, { "Content-Type": "image/svg+xml" });
+  return c.body(generatePunkSvg(fid), 200, { "Content-Type": "image/svg+xml" });
 });
 
 app.get("/placeholder", (c) => {
-  const S = 240, u = S / 24;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" shape-rendering="crispEdges">
-  <defs><pattern id="g" width="${u}" height="${u}" patternUnits="userSpaceOnUse"><path d="M ${u} 0 L 0 0 0 ${u}" fill="none" stroke="#fff" stroke-width="0.4"/></pattern></defs>
+  const S = 240;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}">
   <rect width="${S}" height="${S}" fill="#1a0533"/>
-  <rect width="${S}" height="${S}" fill="url(#g)" opacity="0.04"/>
-  <rect x="10" y="10" width="${S-20}" height="${S-20}" fill="none" stroke="#a259ff" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.5"/>
-  <text x="${S/2}" y="${S/2+30}" font-family="monospace" font-size="90" font-weight="bold" fill="#a259ff" text-anchor="middle" opacity="0.8">?</text>
-  <text x="${S/2}" y="${S-20}" font-family="monospace" font-size="10" fill="#666" text-anchor="middle">tap generate to reveal</text>
-</svg>`;
+  <text x="50%" y="50%" font-size="60" fill="#a259ff" text-anchor="middle">?</text>
+  </svg>`;
   return c.body(svg, 200, { "Content-Type": "image/svg+xml" });
 });
 
@@ -115,6 +110,13 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
   const url = new URL(ctx.request.url);
   const base = url.origin;
   const generated = url.searchParams.get("generated") === "1";
+  const fid = ctx.action.user.fid ?? 1;
+
+  const img = generated
+    ? `${base}/snapunks/punk/${fid}`
+    : `${base}/snapunks/placeholder`;
+
+  const text = `Just claimed my Punk #${fid}! Every FID gets a unique one.`;
 
   if (ctx.action.type !== "post" || !generated) {
     return {
@@ -125,16 +127,12 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
         elements: {
           page: { type: "stack", props: { direction: "vertical", gap: "md" }, children: ["title", "placeholder", "generateBtn"] },
           title: { type: "text", props: { content: "Claim your Punk", size: "md", weight: "bold", align: "center" } },
-          placeholder: { type: "image", props: { url: `${base}/snapunks/placeholder`, alt: "Your punk will appear here", aspect: "1:1" } },
+          placeholder: { type: "image", props: { url: img, alt: "punk", aspect: "1:1" } },
           generateBtn: { type: "button", props: { label: "Generate Punk", variant: "primary", icon: "zap" }, on: { press: { action: "submit", params: { target: `${base}/snapunks?generated=1` } } } },
         },
       },
     };
   }
-
-  const fid = ctx.action.user.fid ?? 1;
-  const imgSrc = `${base}/snapunks/punk/${fid}`;
-  const shareText = `Just claimed my Punk #${fid}! Every FID gets a unique one.\n\nGet yours now!`;
 
   return {
     version: "1.0",
@@ -144,9 +142,9 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
       elements: {
         page: { type: "stack", props: { direction: "vertical", gap: "md" }, children: ["title", "punkImg", "btnRow"] },
         title: { type: "text", props: { content: "Claim your Punk", size: "md", weight: "bold", align: "center" } },
-        punkImg: { type: "image", props: { url: imgSrc, alt: `Punk #${fid}`, aspect: "1:1" } },
+        punkImg: { type: "image", props: { url: img, alt: `Punk #${fid}`, aspect: "1:1" } },
         btnRow: { type: "stack", props: { direction: "horizontal", gap: "sm", justify: "center" }, children: ["shareBtn"] },
-        shareBtn: { type: "button", props: { label: "Share Punk", variant: "primary", icon: "share" }, on: { press: { action: "compose_cast", params: { text: shareText, embeds: [`${base}/snapunks`] } } } },
+        shareBtn: { type: "button", props: { label: "Share Punk", variant: "primary", icon: "share" }, on: { press: { action: "compose_cast", params: { text, embeds: [img] } } } },
       },
     },
   };
