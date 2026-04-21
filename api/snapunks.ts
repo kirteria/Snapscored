@@ -2,113 +2,218 @@ import { Hono } from "hono";
 import { registerSnapHandler } from "@farcaster/snap-hono";
 import type { SnapHandlerResult } from "@farcaster/snap";
 
-const BACKGROUNDS = ["#1a0533","#0a0a0a","#001a1a","#0d0d2b","#1a0a00","#0a1a00","#1a0010","#000d1a"];
-const SKINS = ["#f5c89a","#d4956a","#a0632a","#6b3a1f","#7dbd6e"];
-const HAIR_STYLES = ["mohawk","long","bald","spiky","afro","cap"] as const;
-const HAIR_COLORS = ["#ff2d55","#00e5ff","#ffe600","#ff6a00","#a259ff","#ffffff","#111111"];
-const EYE_STYLES = ["normal","angry","tired","shades","laser"] as const;
-const MOUTH_STYLES = ["smirk","frown","cig","gold"] as const;
-const ACCESSORY_STYLES = ["chain","earring","hat","none","halo","scar"] as const;
-const SHIRT_COLORS = ["#1e1e2e","#2d1b69","#0f3460","#1a1a2e","#16213e","#0a0a0a"];
+// ─── Seeded RNG  ───────────────────────────────────────
 
-type Hair = typeof HAIR_STYLES[number];
-type Eye = typeof EYE_STYLES[number];
-type Mouth = typeof MOUTH_STYLES[number];
-type Accessory = typeof ACCESSORY_STYLES[number];
-
-function seededRng(seed: number) {
+function makeRng(seed: number) {
   let s = seed;
-  return () => { s = (s * 1664525 + 1013904223) & 0xffffffff; return (s >>> 0) / 0xffffffff; };
-}
-function pick<T>(arr: readonly T[], rng: () => number): T {
-  return arr[Math.floor(rng() * arr.length)];
-}
-function hair(style: Hair, color: string, u: number): string {
-  switch (style) {
-    case "mohawk": return `<rect x="${8*u}" y="0" width="${8*u}" height="${6*u}" fill="${color}" rx="${u}"/><rect x="${10*u}" y="${-2*u}" width="${4*u}" height="${4*u}" fill="${color}"/>`;
-    case "long": return `<rect x="${4*u}" y="${2*u}" width="${16*u}" height="${4*u}" fill="${color}" rx="${u}"/><rect x="${3*u}" y="${6*u}" width="${3*u}" height="${10*u}" fill="${color}" rx="${u}"/><rect x="${18*u}" y="${6*u}" width="${3*u}" height="${10*u}" fill="${color}" rx="${u}"/>`;
-    case "bald": return `<rect x="${5*u}" y="${2*u}" width="${14*u}" height="${2*u}" fill="${color}" rx="${u}" opacity="0.4"/>`;
-    case "spiky": return `<polygon points="${8*u},${4*u} ${10*u},${-1*u} ${12*u},${4*u}" fill="${color}"/><polygon points="${11*u},${4*u} ${13*u},${-2*u} ${15*u},${4*u}" fill="${color}"/><polygon points="${5*u},${4*u} ${7*u},0 ${9*u},${4*u}" fill="${color}"/><rect x="${4*u}" y="${3*u}" width="${16*u}" height="${3*u}" fill="${color}"/>`;
-    case "afro": return `<ellipse cx="${12*u}" cy="${4*u}" rx="${9*u}" ry="${7*u}" fill="${color}"/>`;
-    case "cap": return `<rect x="${4*u}" y="${3*u}" width="${16*u}" height="${4*u}" fill="${color}" rx="${u}"/><rect x="${2*u}" y="${6*u}" width="${5*u}" height="${1.5*u}" fill="${color}"/>`;
-  }
-}
-function eyes(style: Eye, u: number): string {
-  switch (style) {
-    case "normal": return `<rect x="${7*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff" rx="${u*.5}"/><rect x="${14*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff" rx="${u*.5}"/><rect x="${8*u}" y="${11*u}" width="${2*u}" height="${2*u}" fill="#222"/><rect x="${15*u}" y="${11*u}" width="${2*u}" height="${2*u}" fill="#222"/>`;
-    case "angry": return `<rect x="${7*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff" rx="${u*.5}"/><rect x="${14*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff" rx="${u*.5}"/><rect x="${8*u}" y="${11*u}" width="${2*u}" height="${2*u}" fill="#ff2222"/><rect x="${15*u}" y="${11*u}" width="${2*u}" height="${2*u}" fill="#ff2222"/><rect x="${6*u}" y="${9*u}" width="${4*u}" height="${1.5*u}" fill="#222" transform="rotate(15,${8*u},${9.5*u})"/><rect x="${14*u}" y="${9*u}" width="${4*u}" height="${1.5*u}" fill="#222" transform="rotate(-15,${16*u},${9.5*u})"/>`;
-    case "tired": return `<rect x="${7*u}" y="${11*u}" width="${3*u}" height="${2*u}" fill="#fff"/><rect x="${14*u}" y="${11*u}" width="${3*u}" height="${2*u}" fill="#fff"/><rect x="${8*u}" y="${11.5*u}" width="${2*u}" height="${1.5*u}" fill="#aaf"/><rect x="${15*u}" y="${11.5*u}" width="${2*u}" height="${1.5*u}" fill="#aaf"/><rect x="${6.5*u}" y="${10.5*u}" width="${4*u}" height="${u}" fill="#222"/><rect x="${13.5*u}" y="${10.5*u}" width="${4*u}" height="${u}" fill="#222"/>`;
-    case "shades": return `<rect x="${5*u}" y="${9.5*u}" width="${6*u}" height="${4*u}" fill="#111" rx="${u}" opacity="0.95"/><rect x="${13*u}" y="${9.5*u}" width="${6*u}" height="${4*u}" fill="#111" rx="${u}" opacity="0.95"/><rect x="${11*u}" y="${10.5*u}" width="${2*u}" height="${1.5*u}" fill="#333"/>`;
-    case "laser": return `<rect x="${7*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#f22" rx="${u*.5}"/><rect x="${14*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#f22" rx="${u*.5}"/><rect x="0" y="${11*u}" width="${24*u}" height="${1.5*u}" fill="#f22" opacity="0.5"/>`;
-  }
-}
-function mouth(style: Mouth, u: number): string {
-  switch (style) {
-    case "smirk": return `<rect x="${9*u}" y="${17*u}" width="${7*u}" height="${2*u}" fill="#c33" rx="${u*.5}"/><rect x="${14*u}" y="${16*u}" width="${2*u}" height="${u}" fill="#c33"/>`;
-    case "frown": return `<rect x="${9*u}" y="${18*u}" width="${6*u}" height="${1.5*u}" fill="#c33" rx="${u*.5}"/><rect x="${9*u}" y="${17*u}" width="${1.5*u}" height="${1.5*u}" fill="#c33"/><rect x="${13.5*u}" y="${17*u}" width="${1.5*u}" height="${1.5*u}" fill="#c33"/>`;
-    case "cig": return `<rect x="${9*u}" y="${17*u}" width="${5*u}" height="${1.5*u}" fill="#c33" rx="${u*.5}"/><rect x="${14*u}" y="${16.5*u}" width="${5*u}" height="${u}" fill="#f5f0e8"/><rect x="${19*u}" y="${15.5*u}" width="${u}" height="${2*u}" fill="#f63" rx="${u*.3}"/>`;
-    case "gold": return `<rect x="${9*u}" y="${17*u}" width="${6*u}" height="${2*u}" fill="#c33" rx="${u*.5}"/><rect x="${11*u}" y="${17*u}" width="${2*u}" height="${2*u}" fill="#FFD700"/>`;
-  }
-}
-function accessory(style: Accessory, u: number): string {
-  switch (style) {
-    case "chain": return `<rect x="${7*u}" y="${20*u}" width="${10*u}" height="${u}" fill="#c0c0c0" rx="${u*.3}"/><rect x="${11*u}" y="${20*u}" width="${2*u}" height="${2*u}" fill="#FFD700" rx="${u*.5}"/>`;
-    case "earring": return `<circle cx="${5*u}" cy="${14*u}" r="${1.5*u}" fill="#FFD700" stroke="#c0a000" stroke-width="${u*.5}"/>`;
-    case "hat": return `<rect x="${4*u}" y="${u}" width="${16*u}" height="${5*u}" fill="#111" rx="${u}"/><rect x="${2*u}" y="${5*u}" width="${20*u}" height="${2*u}" fill="#111" rx="${u*.5}"/>`;
-    case "none": return "";
-    case "halo": return `<ellipse cx="${12*u}" cy="${1.5*u}" rx="${7*u}" ry="${2*u}" fill="none" stroke="#FFD700" stroke-width="${u*1.5}"/>`;
-    case "scar": return `<rect x="${16*u}" y="${11*u}" width="${u}" height="${5*u}" fill="#c00" rx="${u*.3}"/><rect x="${15.5*u}" y="${12*u}" width="${2*u}" height="${u*.8}" fill="#c00"/>`;
-  }
+  return {
+    next(): number {
+      s = (s * 9301 + 49297) % 233280;
+      return s / 233280;
+    },
+    range(a: number, b: number): number {
+      return a + this.next() * (b - a);
+    },
+    int(a: number, b: number): number {
+      return Math.floor(this.range(a, b + 1));
+    },
+  };
 }
 
-function generatePunkSvg(fid: number): string {
-  const rng = seededRng(fid * 7919 + 12345);
-  const S = 240, u = S / 24;
-  const bg = pick(BACKGROUNDS, rng);
-  const skin = pick(SKINS, rng);
-  const hairSt = pick(HAIR_STYLES, rng);
-  const hairCol = pick(HAIR_COLORS, rng);
-  const eyeSt = pick(EYE_STYLES, rng);
-  const mouthSt = pick(MOUTH_STYLES, rng);
-  const accSt = pick(ACCESSORY_STYLES, rng);
-  const shirt = pick(SHIRT_COLORS, rng);
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" shape-rendering="crispEdges">
-  <defs><pattern id="g" width="${u}" height="${u}" patternUnits="userSpaceOnUse"><path d="M ${u} 0 L 0 0 0 ${u}" fill="none" stroke="#fff" stroke-width="0.4"/></pattern></defs>
+function fidToSeed(fid: number): number {
+  let h = fid * 2654435761;
+  h = (h ^ (h >>> 16)) & 0xffffff;
+  return 100000 + (h % 900000);
+}
+
+// ─── Color helpers ────────────────────────────────────────────────────────────
+
+function hslToHex(h: number, s: number, l: number): string {
+  h = ((h % 360) + 360) % 360;
+  s = Math.max(0, Math.min(100, s));
+  l = Math.max(0, Math.min(100, l));
+  const sl = s / 100, ll = l / 100;
+  const c = (1 - Math.abs(2 * ll - 1)) * sl;
+  const hp = h / 60;
+  const x = c * (1 - Math.abs((hp % 2) - 1));
+  let r = 0, g = 0, b = 0;
+  if (hp < 1) { r = c; g = x; }
+  else if (hp < 2) { r = x; g = c; }
+  else if (hp < 3) { g = c; b = x; }
+  else if (hp < 4) { g = x; b = c; }
+  else if (hp < 5) { r = x; b = c; }
+  else { r = c; b = x; }
+  const m = ll - c / 2;
+  const hex = (v: number) => Math.round((v + m) * 255).toString(16).padStart(2, "0");
+  return `#${hex(r)}${hex(g)}${hex(b)}`;
+}
+
+// ─── Generator ────────────────────────────────────────────────────────────────
+
+function generateArtSvg(fid: number): string {
+  const seed = fidToSeed(fid);
+  const rng = makeRng(seed);
+  const S = 600;
+  const CX = S / 2, CY = S / 2;
+
+  // Color mode
+  const colorModeR = rng.next();
+  const colorMode = colorModeR < 0.60 ? "static" : colorModeR < 0.88 ? "gradient" : "rainbow";
+
+  // Palette
+  const baseHue = rng.int(0, 359);
+  type HSL = [number, number, number];
+  let palette: HSL[];
+  if (colorMode === "static") {
+    palette = [[baseHue, 90, 55]];
+  } else if (colorMode === "gradient") {
+    const count = rng.int(2, 3);
+    palette = Array.from({ length: count }, (_, i) => [
+      (baseHue + i * 45 + rng.int(-15, 15) + 360) % 360, 90, 55,
+    ] as HSL);
+  } else {
+    palette = Array.from({ length: 6 }, (_, i) => [
+      (i * 60 + rng.int(-8, 8) + 360) % 360, 90, 55,
+    ] as HSL);
+  }
+
+  // Brightness
+  const bR = rng.next();
+  const alpha = bR < 0.18 ? 0.22 : bR < 0.40 ? 0.45 : bR < 0.70 ? 0.75 : 1.0;
+
+  // Background: dark always
+  const bgHue = (baseHue + 180) % 360;
+  const bg = hslToHex(bgHue, 20, 8);
+
+  // Symmetry
+  const symR = rng.next();
+  const symmetry = symR < 0.55 ? "none" : symR < 0.82 ? "partial" : "full";
+
+  // Wave parameters
+  const harmonics = rng.int(2, 7);
+  const segments = rng.int(80, 200);
+  const baseAmp = S * rng.range(0.12, 0.30);
+  const centerY = rng.range(S * 0.3, S * 0.7);
+
+  const phases = Array.from({ length: harmonics }, () => rng.next() * Math.PI * 2);
+  const freqs = Array.from({ length: harmonics }, (_, i) => 0.5 + i * 0.6 + rng.next() * 0.5);
+  const amps = Array.from({ length: harmonics }, (_, i) =>
+    baseAmp * (0.4 * Math.pow(0.6, i) + rng.next() * 0.25)
+  );
+
+  // Build backbone points
+  type Pt = { x: number; y: number };
+  const pts: Pt[] = [];
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments;
+    const x = 40 + (S - 80) * t;
+    let y = centerY;
+    for (let j = 0; j < harmonics; j++) {
+      y += Math.sin(t * Math.PI * 2 * freqs[j] + phases[j]) * amps[j];
+    }
+    pts.push({ x, y });
+  }
+
+  // Lines per segment
+  const lineTarget = rng.int(600, 2000);
+  const perSeg = Math.max(3, Math.min(25, Math.floor(lineTarget / segments)));
+
+  // Build SVG lines
+  const lineEls: string[] = [];
+
+  const getColor = (ratio: number): string => {
+    if (colorMode === "rainbow") {
+      return hslToHex((ratio * 360 + rng.next() * 10) % 360, 90, 58);
+    }
+    const n = palette.length;
+    const scaled = ratio * (n - 1);
+    const ai = Math.floor(scaled);
+    const lt = scaled - ai;
+    const [h1, s1, l1] = palette[ai];
+    const [h2, s2, l2] = palette[Math.min(ai + 1, n - 1)];
+    const hh = (h1 + ((h2 - h1 + 540) % 360 - 180) * lt + 360) % 360;
+    const ss = s1 + (s2 - s1) * lt;
+    const ll = l1 + (l2 - l1) * lt;
+    return hslToHex(hh, ss, ll);
+  };
+
+  const totalLines = segments * perSeg;
+
+  for (let i = 0; i < segments; i++) {
+    const p0 = pts[i];
+    const p1 = pts[i + 1];
+    const dx = p1.x - p0.x;
+    const dy = p1.y - p0.y;
+    const len = Math.sqrt(dx * dx + dy * dy) || 1;
+    // perpendicular unit vector
+    const nx = -dy / len;
+    const ny = dx / len;
+
+    for (let j = 0; j < perSeg; j++) {
+      const tLine = (i * perSeg + j) / (totalLines - 1);
+      const frac = j / perSeg;
+      const cx = p0.x + dx * frac;
+      const cy = p0.y + dy * frac;
+      const lineLen = rng.range(8, 36);
+      const phase = rng.next() * Math.PI * 2;
+      const offset = Math.sin(phase) * lineLen;
+      const color = getColor(tLine);
+      const w = (1 + rng.next() * 2).toFixed(1);
+      const opStr = alpha.toFixed(2);
+
+      const x1 = (cx - nx * offset).toFixed(1);
+      const y1 = (cy - ny * offset).toFixed(1);
+      const x2 = (cx + nx * offset).toFixed(1);
+      const y2 = (cy + ny * offset).toFixed(1);
+
+      lineEls.push(
+        `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${w}" stroke-linecap="round" opacity="${opStr}"/>`
+      );
+
+      if (symmetry === "partial" || symmetry === "full") {
+        const sy1 = (S - parseFloat(y1)).toFixed(1);
+        const sy2 = (S - parseFloat(y2)).toFixed(1);
+        lineEls.push(
+          `<line x1="${x1}" y1="${sy1}" x2="${x2}" y2="${sy2}" stroke="${color}" stroke-width="${w}" stroke-linecap="round" opacity="${opStr}"/>`
+        );
+      }
+
+      if (symmetry === "full") {
+        const mx1 = (S - parseFloat(x1)).toFixed(1);
+        const mx2 = (S - parseFloat(x2)).toFixed(1);
+        lineEls.push(
+          `<line x1="${mx1}" y1="${y1}" x2="${mx2}" y2="${y2}" stroke="${color}" stroke-width="${w}" stroke-linecap="round" opacity="${opStr}"/>`
+        );
+        const sy1 = (S - parseFloat(y1)).toFixed(1);
+        const sy2 = (S - parseFloat(y2)).toFixed(1);
+        lineEls.push(
+          `<line x1="${mx1}" y1="${sy1}" x2="${mx2}" y2="${sy2}" stroke="${color}" stroke-width="${w}" stroke-linecap="round" opacity="${opStr}"/>`
+        );
+      }
+    }
+  }
+
+  // FID watermark
+  const watermark = `<text x="${S - 12}" y="${S - 10}" font-family="monospace" font-size="11" fill="${hslToHex(baseHue, 60, 70)}" text-anchor="end" opacity="0.5">#${fid}</text>`;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">
   <rect width="${S}" height="${S}" fill="${bg}"/>
-  <rect width="${S}" height="${S}" fill="url(#g)" opacity="0.04"/>
-  <rect x="${3*u}" y="${19*u}" width="${18*u}" height="${5*u}" fill="${shirt}" rx="${u}"/>
-  <rect x="${10*u}" y="${17*u}" width="${4*u}" height="${3*u}" fill="${skin}"/>
-  <rect x="${5*u}" y="${5*u}" width="${14*u}" height="${13*u}" fill="${skin}" rx="${u}"/>
-  ${hair(hairSt, hairCol, u)}
-  ${eyes(eyeSt, u)}
-  <rect x="${11*u}" y="${14*u}" width="${2*u}" height="${1.5*u}" fill="${skin}"/>
-  <rect x="${10*u}" y="${15*u}" width="${u}" height="${u}" fill="${skin}" opacity="0.7"/>
-  <rect x="${13*u}" y="${15*u}" width="${u}" height="${u}" fill="${skin}" opacity="0.7"/>
-  ${mouth(mouthSt, u)}
-  ${accessory(accSt, u)}
-  <rect width="${S}" height="${S}" fill="none" stroke="#ffffff" stroke-width="${u*.3}" opacity="0.15"/>
+  ${lineEls.join("\n  ")}
+  ${watermark}
 </svg>`;
 }
+
+// ─── App ─────────────────────────────────────────────────────────────────────
 
 const app = new Hono();
 
-app.get("/punk/:fid", (c) => {
+app.get("/art/:fid", (c) => {
   const fid = parseInt(c.req.param("fid"), 10) || 1;
-  const svg = generatePunkSvg(fid);
-  return c.body(svg, 200, { "Content-Type": "image/svg+xml" });
-});
-
-app.get("/placeholder", (c) => {
-  const S = 240, u = S / 24;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" shape-rendering="crispEdges">
-  <defs><pattern id="g" width="${u}" height="${u}" patternUnits="userSpaceOnUse"><path d="M ${u} 0 L 0 0 0 ${u}" fill="none" stroke="#fff" stroke-width="0.4"/></pattern></defs>
-  <rect width="${S}" height="${S}" fill="#1a0533"/>
-  <rect width="${S}" height="${S}" fill="url(#g)" opacity="0.04"/>
-  <rect x="10" y="10" width="${S-20}" height="${S-20}" fill="none" stroke="#a259ff" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.5"/>
-  <text x="${S/2}" y="${S/2+30}" font-family="monospace" font-size="90" font-weight="bold" fill="#a259ff" text-anchor="middle" opacity="0.8">?</text>
-  <text x="${S/2}" y="${S-20}" font-family="monospace" font-size="10" fill="#666" text-anchor="middle">tap generate to reveal</text>
-</svg>`;
-  return c.body(svg, 200, { "Content-Type": "image/svg+xml" });
+  const svg = generateArtSvg(fid);
+  return c.body(svg, 200, {
+    "Content-Type": "image/svg+xml",
+    "Cache-Control": "public, max-age=31536000, immutable",
+  });
 });
 
 registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
@@ -123,18 +228,32 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
       ui: {
         root: "page",
         elements: {
-          page: { type: "stack", props: { direction: "vertical", gap: "md" }, children: ["title", "placeholder", "generateBtn"] },
-          title: { type: "text", props: { content: "Claim your Punk", size: "md", weight: "bold", align: "center" } },
-          placeholder: { type: "image", props: { url: `${base}/snapunks/placeholder`, alt: "Your punk will appear here", aspect: "1:1" } },
-          generateBtn: { type: "button", props: { label: "Generate Punk", variant: "primary", icon: "zap" }, on: { press: { action: "submit", params: { target: `${base}/snapunks?generated=1` } } } },
+          page: {
+            type: "stack",
+            props: { direction: "vertical", gap: "md" },
+            children: ["title", "subtitle", "generateBtn"],
+          },
+          title: {
+            type: "text",
+            props: { content: "SnaPunks", size: "lg", weight: "bold", align: "center" },
+          },
+          subtitle: {
+            type: "text",
+            props: { content: "Generate your unique generative art — one per FID, forever.", size: "sm", align: "center" },
+          },
+          generateBtn: {
+            type: "button",
+            props: { label: "Generate My Art", variant: "primary", icon: "zap" },
+            on: { press: { action: "submit", params: { target: `${base}/snapunks?generated=1` } } },
+          },
         },
       },
     };
   }
 
   const fid = ctx.action.user.fid ?? 1;
-  const imgSrc = `${base}/snapunks/punk/${fid}`;
-  const shareText = `Just claimed my Punk #${fid}! Every FID gets a unique one.\n\nGet yours now!`;
+  const artUrl = `${base}/snapunks/art/${fid}`;
+  const shareText = `My SnaPunk #${fid} — unique generative art seeded by my FID.\n\nsnapapps.vercel.app/snapunks`;
 
   return {
     version: "1.0",
@@ -142,11 +261,34 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
     ui: {
       root: "page",
       elements: {
-        page: { type: "stack", props: { direction: "vertical", gap: "md" }, children: ["title", "punkImg", "btnRow"] },
-        title: { type: "text", props: { content: "Claim your Punk", size: "md", weight: "bold", align: "center" } },
-        punkImg: { type: "image", props: { url: imgSrc, alt: `Punk #${fid}`, aspect: "1:1" } },
-        btnRow: { type: "stack", props: { direction: "horizontal", gap: "sm", justify: "center" }, children: ["shareBtn"] },
-        shareBtn: { type: "button", props: { label: "Share Punk", variant: "primary", icon: "share" }, on: { press: { action: "compose_cast", params: { text: shareText, embeds: [`${base}/snapunks`] } } } },
+        page: {
+          type: "stack",
+          props: { direction: "vertical", gap: "sm" },
+          children: ["title", "artImg", "btnRow"],
+        },
+        title: {
+          type: "text",
+          props: { content: `SnaPunk #${fid}`, size: "md", weight: "bold", align: "center" },
+        },
+        artImg: {
+          type: "image",
+          props: { url: artUrl, aspect: "1:1", alt: `SnaPunk #${fid}` },
+        },
+        btnRow: {
+          type: "stack",
+          props: { direction: "horizontal", gap: "sm", justify: "center" },
+          children: ["shareBtn", "regenBtn"],
+        },
+        shareBtn: {
+          type: "button",
+          props: { label: "Share", variant: "primary", icon: "share" },
+          on: { press: { action: "compose_cast", params: { text: shareText, embeds: [`${base}/snapunks`] } } },
+        },
+        regenBtn: {
+          type: "button",
+          props: { label: "Regenerate", variant: "secondary", icon: "refresh-cw" },
+          on: { press: { action: "submit", params: { target: `${base}/snapunks?generated=1` } } },
+        },
       },
     },
   };
