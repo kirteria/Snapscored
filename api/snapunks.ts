@@ -125,7 +125,7 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
         elements: {
           page: { type: "stack", props: { direction: "vertical", gap: "md" }, children: ["title", "placeholder", "generateBtn"] },
           title: { type: "text", props: { content: "Claim your SnaPunk", size: "md", weight: "bold", align: "center" } },
-          placeholder: { type: "image", props: { src: `${base}/snapunks/placeholder`, alt: "Your punk will appear here", aspectRatio: "1:1" } },
+          placeholder: { type: "image", props: { url: `${base}/snapunks/placeholder`, alt: "Your punk will appear here", aspect: "1:1" } },
           generateBtn: { type: "button", props: { label: "Generate Punk", variant: "primary", icon: "zap" }, on: { press: { action: "submit", params: { target: `${base}/snapunks?generated=1` } } } },
         },
       },
@@ -134,7 +134,7 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
 
   const fid = ctx.action.user.fid ?? 1;
   const imgSrc = `${base}/snapunks/punk/${fid}`;
-  const shareText = `Just claimed my SnaPunk #${fid}! Every FID gets a unique one.\n\nGet yours -> snapapps.vercel.app/snapunks`;
+  const shareText = `Just claimed my Punk #${fid}! Every FID gets a unique one.\n\nGet yours -> snapapps.vercel.app/snapunks`;
 
   return {
     version: "1.0",
@@ -143,8 +143,8 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
       root: "page",
       elements: {
         page: { type: "stack", props: { direction: "vertical", gap: "md" }, children: ["title", "punkImg", "btnRow"] },
-        title: { type: "text", props: { content: "Claim your SnaPunk", size: "md", weight: "bold", align: "center" } },
-        punkImg: { type: "image", props: { src: imgSrc, alt: `SnaPunk #${fid}`, aspectRatio: "1:1" } },
+        title: { type: "text", props: { content: "Claim your Punk", size: "md", weight: "bold", align: "center" } },
+        punkImg: { type: "image", props: { url: imgSrc, alt: `Punk #${fid}`, aspect: "1:1" } },
         btnRow: { type: "stack", props: { direction: "horizontal", gap: "sm", justify: "center" }, children: ["shareBtn"] },
         shareBtn: { type: "button", props: { label: "Share Punk", variant: "primary", icon: "share" }, on: { press: { action: "compose_cast", params: { text: shareText, embeds: [`${base}/snapunks`] } } } },
       },
