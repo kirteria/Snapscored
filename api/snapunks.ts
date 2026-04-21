@@ -119,4 +119,6 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
   };
 }, { og: false, fallbackHtml: FALLBACK });
 
-export default app;
+export default app.fetch.bind(app);
+export { app };
+
