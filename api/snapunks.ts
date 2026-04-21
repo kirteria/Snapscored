@@ -38,37 +38,38 @@ function hair(style: Hair, color: string, u: number): string {
 
 function eyes(style: Eye, u: number): string {
   switch (style) {
-    case "normal": return `<rect x="${7*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff" rx="${u*.5}"/><rect x="${14*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff" rx="${u*.5}"/><rect x="${8*u}" y="${11*u}" width="${2*u}" height="${2*u}" fill="#222"/><rect x="${15*u}" y="${11*u}" width="${2*u}" height="${2*u}" fill="#222"/>`;
-    case "angry": return `<rect x="${7*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff" rx="${u*.5}"/><rect x="${14*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff" rx="${u*.5}"/><rect x="${8*u}" y="${11*u}" width="${2*u}" height="${2*u}" fill="#ff2222"/><rect x="${15*u}" y="${11*u}" width="${2*u}" height="${2*u}" fill="#ff2222"/><rect x="${6*u}" y="${9*u}" width="${4*u}" height="${1.5*u}" fill="#222" transform="rotate(15,${8*u},${9.5*u})"/><rect x="${14*u}" y="${9*u}" width="${4*u}" height="${1.5*u}" fill="#222" transform="rotate(-15,${16*u},${9.5*u})"/>`;
-    case "tired": return `<rect x="${7*u}" y="${11*u}" width="${3*u}" height="${2*u}" fill="#fff"/><rect x="${14*u}" y="${11*u}" width="${3*u}" height="${2*u}" fill="#fff"/><rect x="${8*u}" y="${11.5*u}" width="${2*u}" height="${1.5*u}" fill="#aaf"/><rect x="${15*u}" y="${11.5*u}" width="${2*u}" height="${1.5*u}" fill="#aaf"/><rect x="${6.5*u}" y="${10.5*u}" width="${4*u}" height="${u}" fill="#222"/><rect x="${13.5*u}" y="${10.5*u}" width="${4*u}" height="${u}" fill="#222"/>`;
-    case "shades": return `<rect x="${5*u}" y="${9.5*u}" width="${6*u}" height="${4*u}" fill="#111" rx="${u}" opacity="0.95"/><rect x="${13*u}" y="${9.5*u}" width="${6*u}" height="${4*u}" fill="#111" rx="${u}" opacity="0.95"/><rect x="${11*u}" y="${10.5*u}" width="${2*u}" height="${1.5*u}" fill="#333"/>`;
-    case "laser": return `<rect x="${7*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#f22" rx="${u*.5}"/><rect x="${14*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#f22" rx="${u*.5}"/><rect x="0" y="${11*u}" width="${24*u}" height="${1.5*u}" fill="#f22" opacity="0.5"/>`;
+    case "normal": return `<rect x="${7*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff"/><rect x="${14*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff"/>`;
+    case "angry": return `<rect x="${7*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff"/><rect x="${14*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#fff"/>`;
+    case "tired": return `<rect x="${7*u}" y="${11*u}" width="${3*u}" height="${2*u}" fill="#fff"/><rect x="${14*u}" y="${11*u}" width="${3*u}" height="${2*u}" fill="#fff"/>`;
+    case "shades": return `<rect x="${5*u}" y="${9.5*u}" width="${6*u}" height="${4*u}" fill="#111"/><rect x="${13*u}" y="${9.5*u}" width="${6*u}" height="${4*u}" fill="#111"/>`;
+    case "laser": return `<rect x="${7*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#f22"/><rect x="${14*u}" y="${10*u}" width="${3*u}" height="${3*u}" fill="#f22"/>`;
   }
 }
 
 function mouth(style: Mouth, u: number): string {
   switch (style) {
-    case "smirk": return `<rect x="${9*u}" y="${17*u}" width="${7*u}" height="${2*u}" fill="#c33" rx="${u*.5}"/><rect x="${14*u}" y="${16*u}" width="${2*u}" height="${u}" fill="#c33"/>`;
-    case "frown": return `<rect x="${9*u}" y="${18*u}" width="${6*u}" height="${1.5*u}" fill="#c33" rx="${u*.5}"/><rect x="${9*u}" y="${17*u}" width="${1.5*u}" height="${1.5*u}" fill="#c33"/><rect x="${13.5*u}" y="${17*u}" width="${1.5*u}" height="${1.5*u}" fill="#c33"/>`;
-    case "cig": return `<rect x="${9*u}" y="${17*u}" width="${5*u}" height="${1.5*u}" fill="#c33" rx="${u*.5}"/><rect x="${14*u}" y="${16.5*u}" width="${5*u}" height="${u}" fill="#f5f0e8"/><rect x="${19*u}" y="${15.5*u}" width="${u}" height="${2*u}" fill="#f63" rx="${u*.3}"/>`;
-    case "gold": return `<rect x="${9*u}" y="${17*u}" width="${6*u}" height="${2*u}" fill="#c33" rx="${u*.5}"/><rect x="${11*u}" y="${17*u}" width="${2*u}" height="${2*u}" fill="#FFD700"/>`;
+    case "smirk": return `<rect x="${9*u}" y="${17*u}" width="${7*u}" height="${2*u}" fill="#c33"/>`;
+    case "frown": return `<rect x="${9*u}" y="${18*u}" width="${6*u}" height="${1.5*u}" fill="#c33"/>`;
+    case "cig": return `<rect x="${9*u}" y="${17*u}" width="${5*u}" height="${1.5*u}" fill="#c33"/>`;
+    case "gold": return `<rect x="${9*u}" y="${17*u}" width="${6*u}" height="${2*u}" fill="#c33"/>`;
   }
 }
 
 function accessory(style: Accessory, u: number): string {
   switch (style) {
-    case "chain": return `<rect x="${7*u}" y="${20*u}" width="${10*u}" height="${u}" fill="#c0c0c0" rx="${u*.3}"/><rect x="${11*u}" y="${20*u}" width="${2*u}" height="${2*u}" fill="#FFD700" rx="${u*.5}"/>`;
-    case "earring": return `<circle cx="${5*u}" cy="${14*u}" r="${1.5*u}" fill="#FFD700" stroke="#c0a000" stroke-width="${u*.5}"/>`;
-    case "hat": return `<rect x="${4*u}" y="${u}" width="${16*u}" height="${5*u}" fill="#111" rx="${u}"/><rect x="${2*u}" y="${5*u}" width="${20*u}" height="${2*u}" fill="#111" rx="${u*.5}"/>`;
+    case "chain": return `<rect x="${7*u}" y="${20*u}" width="${10*u}" height="${u}" fill="#c0c0c0"/>`;
+    case "earring": return `<circle cx="${5*u}" cy="${14*u}" r="${1.5*u}" fill="#FFD700"/>`;
+    case "hat": return `<rect x="${4*u}" y="${u}" width="${16*u}" height="${5*u}" fill="#111"/>`;
     case "none": return "";
-    case "halo": return `<ellipse cx="${12*u}" cy="${1.5*u}" rx="${7*u}" ry="${2*u}" fill="none" stroke="#FFD700" stroke-width="${u*1.5}"/>`;
-    case "scar": return `<rect x="${16*u}" y="${11*u}" width="${u}" height="${5*u}" fill="#c00" rx="${u*.3}"/><rect x="${15.5*u}" y="${12*u}" width="${2*u}" height="${u*.8}" fill="#c00"/>`;
+    case "halo": return `<ellipse cx="${12*u}" cy="${1.5*u}" rx="${7*u}" ry="${2*u}" fill="none" stroke="#FFD700"/>`;
+    case "scar": return `<rect x="${16*u}" y="${11*u}" width="${u}" height="${5*u}" fill="#c00"/>`;
   }
 }
 
 function generatePunkSvg(fid: number): string {
   const rng = seededRng(fid * 7919 + 12345);
   const S = 240, u = S / 24;
+
   const bg = pick(BACKGROUNDS, rng);
   const skin = pick(SKINS, rng);
   const hairSt = pick(HAIR_STYLES, rng);
@@ -78,11 +79,9 @@ function generatePunkSvg(fid: number): string {
   const accSt = pick(ACCESSORY_STYLES, rng);
   const shirt = pick(SHIRT_COLORS, rng);
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" shape-rendering="crispEdges">
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}">
   <rect width="${S}" height="${S}" fill="${bg}"/>
-  <rect x="${3*u}" y="${19*u}" width="${18*u}" height="${5*u}" fill="${shirt}" rx="${u}"/>
-  <rect x="${10*u}" y="${17*u}" width="${4*u}" height="${3*u}" fill="${skin}"/>
-  <rect x="${5*u}" y="${5*u}" width="${14*u}" height="${13*u}" fill="${skin}" rx="${u}"/>
+  <rect x="${5*u}" y="${5*u}" width="${14*u}" height="${13*u}" fill="${skin}"/>
   ${hair(hairSt, hairCol, u)}
   ${eyes(eyeSt, u)}
   ${mouth(mouthSt, u)}
@@ -99,24 +98,23 @@ app.get("/punk/:fid", (c) => {
 
 app.get("/placeholder", (c) => {
   const S = 240;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}">
-  <rect width="${S}" height="${S}" fill="#1a0533"/>
-  <text x="50%" y="50%" font-size="60" fill="#a259ff" text-anchor="middle">?</text>
-  </svg>`;
-  return c.body(svg, 200, { "Content-Type": "image/svg+xml" });
+  return c.body(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}">
+      <rect width="${S}" height="${S}" fill="#1a0533"/>
+      <text x="50%" y="50%" font-size="60" fill="#a259ff" text-anchor="middle">?</text>
+    </svg>`,
+    200,
+    { "Content-Type": "image/svg+xml" }
+  );
 });
 
 registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
   const url = new URL(ctx.request.url);
   const base = url.origin;
   const generated = url.searchParams.get("generated") === "1";
-  const fid = ctx.action.user.fid ?? 1;
 
-  const img = generated
-    ? `${base}/snapunks/punk/${fid}`
-    : `${base}/snapunks/placeholder`;
-
-  const text = `Just claimed my Punk #${fid}! Every FID gets a unique one.`;
+  const fid = ctx.action.type === "post" ? ctx.action.user.fid : 1;
+  const img = `${base}/snapunks/punk/${fid}`;
 
   if (ctx.action.type !== "post" || !generated) {
     return {
@@ -127,10 +125,10 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
         elements: {
           page: { type: "stack", props: { direction: "vertical", gap: "md" }, children: ["title", "placeholder", "generateBtn"] },
           title: { type: "text", props: { content: "Claim your Punk", size: "md", weight: "bold", align: "center" } },
-          placeholder: { type: "image", props: { url: img, alt: "punk", aspect: "1:1" } },
-          generateBtn: { type: "button", props: { label: "Generate Punk", variant: "primary", icon: "zap" }, on: { press: { action: "submit", params: { target: `${base}/snapunks?generated=1` } } } },
-        },
-      },
+          placeholder: { type: "image", props: { url: `${base}/snapunks/placeholder`, aspect: "1:1" } },
+          generateBtn: { type: "button", props: { label: "Generate Punk" }, on: { press: { action: "submit", params: { target: `${base}/snapunks?generated=1` } } } }
+        }
+      }
     };
   }
 
@@ -142,11 +140,23 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
       elements: {
         page: { type: "stack", props: { direction: "vertical", gap: "md" }, children: ["title", "punkImg", "btnRow"] },
         title: { type: "text", props: { content: "Claim your Punk", size: "md", weight: "bold", align: "center" } },
-        punkImg: { type: "image", props: { url: img, alt: `Punk #${fid}`, aspect: "1:1" } },
-        btnRow: { type: "stack", props: { direction: "horizontal", gap: "sm", justify: "center" }, children: ["shareBtn"] },
-        shareBtn: { type: "button", props: { label: "Share Punk", variant: "primary", icon: "share" }, on: { press: { action: "compose_cast", params: { text, embeds: [img] } } } },
-      },
-    },
+        punkImg: { type: "image", props: { url: img, aspect: "1:1" } },
+        btnRow: { type: "stack", props: { direction: "horizontal", gap: "sm" }, children: ["shareBtn"] },
+        shareBtn: {
+          type: "button",
+          props: { label: "Share Punk" },
+          on: {
+            press: {
+              action: "compose_cast",
+              params: {
+                text: `Just claimed my Punk #${fid}!`,
+                embeds: [img]
+              }
+            }
+          }
+        }
+      }
+    }
   };
 });
 
