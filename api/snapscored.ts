@@ -104,14 +104,14 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
             on: {
               press: {
                 action: "compose_cast",
-                params: { text: shareText, embeds: [`${base}/`] },
+                params: { text: shareText, embeds: [`${base}/snapscored`] },
               },
             },
           },
           retryBtn: {
             type: "button",
             props: { label: "Retry", variant: "primary", icon: "refresh-cw" },
-            on: { press: { action: "submit", params: { target: `${base}/?checked=1` } } },
+            on: { press: { action: "submit", params: { target: `${base}/snapscored?checked=1` } } },
           },
         },
       },
@@ -143,6 +143,7 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
   }
 });
 
-export default app.fetch.bind(app);
 export { app };
+export default (req: Request) => app.fetch(req);
+
 
