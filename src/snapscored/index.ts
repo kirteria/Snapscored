@@ -1,21 +1,19 @@
+import { Hono } from "hono";
+import { registerSnapHandler } from "@farcaster/snap-hono";
 import type { SnapHandlerResult } from "@farcaster/snap";
+
+const FALLBACK = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>SnapScored</title></head><body style="background:#0a0a0a;color:#fff;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;text-align:center"><p>Open in Farcaster to use SnapScored.</p></body></html>`;
 
 async function fetchNeynarScore(fid: number) {
   const apiKey = process.env.NEYNAR_API_KEY;
   if (!apiKey) throw new Error("Missing NEYNAR_API_KEY");
-
   const res = await fetch(
     `https://api.neynar.com/v2/farcaster/user/bulk?fids=${fid}`,
     { headers: { "x-api-key": apiKey } }
   );
-
-  const data = (await res.json()) as {
-    users: Array<{ score: number }>;
-  };
-
+  const data = (await res.json()) as { users: Array<{ score: number }> };
   const user = data.users?.[0];
   if (!user) throw new Error("User not found");
-
   return user.score ?? 0;
 }
 
@@ -28,7 +26,9 @@ function scoreTier(score: number): string {
   return "Welcome Newcomer!";
 }
 
-export async function snapscored(ctx: any): Promise<SnapHandlerResult> {
+const app = new Hono();
+
+registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
   const url = new URL(ctx.request.url);
   const base = url.origin;
   const checked = url.searchParams.get("checked") === "1";
@@ -82,7 +82,7 @@ export async function snapscored(ctx: any): Promise<SnapHandlerResult> {
           },
           tierLine: {
             type: "text",
-            props: { content: `${tier}`, size: "md", weight: "bold", align: "center" },
+            props: { content: tier, size: "md", weight: "bold", align: "center" },
           },
           scoreLine: {
             type: "text",
@@ -136,4 +136,6 @@ export async function snapscored(ctx: any): Promise<SnapHandlerResult> {
       },
     };
   }
-}
+}, { og: false, fallbackHtml: FALLBACK });
+
+export default app;
