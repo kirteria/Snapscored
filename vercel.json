@@ -10,5 +10,6 @@
     "api/index.ts": { "memory": 256 },
     "api/snapscored.ts": { "memory": 256 },
     "api/snapunks.ts": { "memory": 256 }
-  }
+  },
+  "framework": null
 }
