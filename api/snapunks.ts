@@ -72,51 +72,58 @@ function generatePunkSvg(fid: number): string {
   const mouthSt = pick(MOUTH_STYLES, rng);
   const accSt = pick(ACCESSORY_STYLES, rng);
   const shirt = pick(SHIRT_COLORS, rng);
+
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" shape-rendering="crispEdges">
-  <defs><pattern id="g" width="${u}" height="${u}" patternUnits="userSpaceOnUse"><path d="M ${u} 0 L 0 0 0 ${u}" fill="none" stroke="#fff" stroke-width="0.4"/></pattern></defs>
   <rect width="${S}" height="${S}" fill="${bg}"/>
-  <rect width="${S}" height="${S}" fill="url(#g)" opacity="0.04"/>
   <rect x="${3*u}" y="${19*u}" width="${18*u}" height="${5*u}" fill="${shirt}" rx="${u}"/>
   <rect x="${10*u}" y="${17*u}" width="${4*u}" height="${3*u}" fill="${skin}"/>
   <rect x="${5*u}" y="${5*u}" width="${14*u}" height="${13*u}" fill="${skin}" rx="${u}"/>
   ${hair(hairSt, hairCol, u)}
   ${eyes(eyeSt, u)}
-  <rect x="${11*u}" y="${14*u}" width="${2*u}" height="${1.5*u}" fill="${skin}"/>
-  <rect x="${10*u}" y="${15*u}" width="${u}" height="${u}" fill="${skin}" opacity="0.7"/>
-  <rect x="${13*u}" y="${15*u}" width="${u}" height="${u}" fill="${skin}" opacity="0.7"/>
   ${mouth(mouthSt, u)}
   ${accessory(accSt, u)}
-  <rect width="${S}" height="${S}" fill="none" stroke="#ffffff" stroke-width="${u*.3}" opacity="0.15"/>
-</svg>`;
+  </svg>`;
 }
 
 const app = new Hono();
 
 app.get("/punk/:fid", (c) => {
   const fid = parseInt(c.req.param("fid"), 10) || 1;
-  const svg = generatePunkSvg(fid);
-  return c.body(svg, 200, { "Content-Type": "image/svg+xml" });
+  return c.body(generatePunkSvg(fid), 200, { "Content-Type": "image/svg+xml" });
 });
 
 app.get("/placeholder", (c) => {
-  const S = 240, u = S / 24;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}" viewBox="0 0 ${S} ${S}" shape-rendering="crispEdges">
-  <defs><pattern id="g" width="${u}" height="${u}" patternUnits="userSpaceOnUse"><path d="M ${u} 0 L 0 0 0 ${u}" fill="none" stroke="#fff" stroke-width="0.4"/></pattern></defs>
+  const S = 240;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${S}" height="${S}">
   <rect width="${S}" height="${S}" fill="#1a0533"/>
-  <rect width="${S}" height="${S}" fill="url(#g)" opacity="0.04"/>
-  <rect x="10" y="10" width="${S-20}" height="${S-20}" fill="none" stroke="#a259ff" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.5"/>
-  <text x="${S/2}" y="${S/2+30}" font-family="monospace" font-size="90" font-weight="bold" fill="#a259ff" text-anchor="middle" opacity="0.8">?</text>
-  <text x="${S/2}" y="${S-20}" font-family="monospace" font-size="10" fill="#666" text-anchor="middle">tap generate to reveal</text>
-</svg>`;
+  <text x="50%" y="50%" font-size="60" fill="#a259ff" text-anchor="middle">?</text>
+  </svg>`;
   return c.body(svg, 200, { "Content-Type": "image/svg+xml" });
 });
 
 registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
+
   const url = new URL(ctx.request.url);
   const base = url.origin;
   const generated = url.searchParams.get("generated") === "1";
 
-  if (ctx.action.type !== "post" || !generated) {
+  if (ctx.action.type !== "post") {
+    return {
+      version: "1.0",
+      theme: { accent: "purple" },
+      ui: {
+        root: "page",
+        elements: {
+          page: { type: "stack", props: { direction: "vertical", gap: "md" }, children: ["title", "placeholder", "generateBtn"] },
+          title: { type: "text", props: { content: "Claim your Punk", size: "md", weight: "bold", align: "center" } },
+          placeholder: { type: "image", props: { url: `${base}/snapunks/placeholder`, alt: "Your punk will appear here", aspect: "1:1" } },
+          generateBtn: { type: "button", props: { label: "Generate Punk", variant: "primary", icon: "zap" }, on: { press: { action: "submit", params: { target: `${base}/snapunks?generated=1` } } } },
+        },
+      },
+    };
+  }
+
+  if (!generated) {
     return {
       version: "1.0",
       theme: { accent: "purple" },
