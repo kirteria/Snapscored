@@ -4,31 +4,29 @@ import type { SnapHandlerResult } from "@farcaster/snap";
 
 const app = new Hono();
 
-function getRandomPage(max = 5) {
-  return Math.floor(Math.random() * max) + 1;
-}
-
 async function fetchRandomGif(): Promise<string> {
-  const page = getRandomPage(100);
+  const page = Math.floor(Math.random() * 10) + 1;
 
   const res = await fetch(
-    `https://api.klipy.com/api/v1/1voc5xDgnKY9i7T9sYDarp43PDCoqeEE1tS7Eaa7wBLciTgwsRk9eLCO0xtlozwS/gifs/search?q=GM&per_page=20&page=${page}&customer_id=snap`
+    `https://api.klipy.com/api/v1/1voc5xDgnKY9i7T9sYDarp43PDCoqeEE1tS7Eaa7wBLciTgwsRk9eLCO0xtlozwS/gifs/search?q=GM&page=${page}&customer_id=snap`
   );
 
   const json = await res.json();
-  const gifs = json?.data?.data;
 
-  if (!gifs || gifs.length === 0) {
-    throw new Error("No GIFs found");
+  const gif = json?.data?.data?.[0];
+
+  if (!gif?.file?.md?.gif?.url) {
+    throw new Error("Invalid GIF structure");
   }
 
-  const randomIndex = Math.floor(Math.random() * gifs.length);
-  return gifs[randomIndex].file.md.gif.url;
+  return gif.file.md.gif.url;
 }
 
+const SNAP_URL = "https://snapapps.vercel.app/gmfarcaster";
+
 registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
-  const base = new URL(ctx.request.url).origin;
-  const said = new URL(ctx.request.url).searchParams.get("said") === "1";
+  const said =
+    new URL(ctx.request.url).searchParams.get("said") === "1";
 
   try {
     const gif = await fetchRandomGif();
@@ -76,7 +74,7 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
               press: {
                 action: "submit",
                 params: {
-                  target: `${base}/api/gmfarcaster?said=1`,
+                  target: `${SNAP_URL}?said=1`,
                 },
               },
             },
@@ -100,7 +98,7 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
               press: {
                 action: "submit",
                 params: {
-                  target: `${base}/api/gmfarcaster?said=1`,
+                  target: `${SNAP_URL}?said=1`,
                 },
               },
             },
@@ -116,7 +114,7 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
               press: {
                 action: "compose_cast",
                 params: {
-                  text: `GM Farcaster 🌞/n/nGenerate yours here 👇/nhttps://snapapps.vercel.app/gmfarcaster`,
+                  text: `GM Farcaster 🌞/n/nGenerate yours here 👇/n${SNAP_URL}`,
                   embeds: [gif],
                 },
               },
