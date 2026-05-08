@@ -38,7 +38,7 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
   if (ctx.action.type !== "post" || !said) {
     return {
       version: "1.0",
-      theme: { accent: "orange" },
+      theme: { accent: "amber" },
       ui: {
         root: "page",
         elements: {
@@ -89,7 +89,7 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
 
     return {
       version: "1.0",
-      theme: { accent: "orange" },
+      theme: { accent: "amber" },
       ui: {
         root: "page",
         elements: {
@@ -157,7 +157,7 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
   } catch {
     return {
       version: "1.0",
-      theme: { accent: "orange" },
+      theme: { accent: "amber" },
       ui: {
         root: "page",
         elements: {
