@@ -45,35 +45,18 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
               align: "center",
             },
             children: said
-              ? ["titleRow", "gifImage", "btnRowAfter"]
-              : ["titleRow", "gifImage", "btnBefore"],
+              ? ["title", "gifImage", "btnRowAfter"]
+              : ["title", "gifImage", "btnBefore"],
           },
-          titleRow: {
-            type: "stack",
+          title: {
+            type: "text",
             props: {
-             direction: "horizontal",
-             gap: "sm",
-             align: "center",
-             justify: "center",
+              content: "GM Farcaster",
+              size: "md",
+              weight: "bold",
+              align: "center",
+            },
           },
-           children: ["titleText", "fcIcon"],
-          },
-
-          titleText: {
-          type: "text",
-           props: {
-            content: "GM Farcaster",
-            size: "md",
-            weight: "bold",
-          },
-        },
-          fcIcon: {
-          type: "image",
-           props: {
-            url: "https://farcaster.xyz/favicon.ico",
-            aspect: "1:1",
-           },
-         },
           gifImage: {
             type: "image",
             props: {
