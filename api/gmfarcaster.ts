@@ -60,7 +60,7 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
           gifImage: {
             type: "image",
             props: {
-              src: gif,
+              url: gif,
               aspect: "1:1",
             },
           },
