@@ -146,4 +146,3 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
 });
 
 export default app;
-```
