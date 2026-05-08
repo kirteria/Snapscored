@@ -114,8 +114,8 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
               press: {
                 action: "compose_cast",
                 params: {
-                  text: `GM Farcaster 🌞\n\nGenerate yours here 👇\n${SNAP_URL}`,
-                  embeds: [gif],
+                  text: `GM Farcaster 🌞`,
+                  embeds: [SNAP_URL],
                 },
               },
             },
