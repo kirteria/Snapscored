@@ -15,11 +15,11 @@ async function fetchRandomGif(): Promise<string> {
 
   const gif = json?.data?.data?.[0];
 
-  if (!gif?.file?.md?.gif?.url) {
+  if (!gif?.file?.sm?.gif?.url) {
     throw new Error("Invalid GIF structure");
   }
 
-  return gif.file.md.gif.url;
+  return gif.file.sm.gif.url;
 }
 
 const SNAP_URL = "https://snapapps.vercel.app/gmfarcaster";
