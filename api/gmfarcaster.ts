@@ -115,7 +115,7 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
                 action: "compose_cast",
                 params: {
                   text: `GM Farcaster 🌞`,
-                  embeds: [SNAP_URL],
+                  embeds: [`${SNAP_URL}?r=${Date.now()}`],
                 },
               },
             },
