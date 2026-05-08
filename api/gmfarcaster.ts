@@ -9,33 +9,30 @@ function getRandomPage(max = 5) {
 }
 
 async function fetchRandomGif(): Promise<string> {
-  const page = getRandomPage(100); 
+  const page = getRandomPage(100);
 
   const res = await fetch(
     `https://api.klipy.com/api/v1/1voc5xDgnKY9i7T9sYDarp43PDCoqeEE1tS7Eaa7wBLciTgwsRk9eLCO0xtlozwS/gifs/search?q=GM&per_page=20&page=${page}&customer_id=snap`
   );
 
   const json = await res.json();
-
   const gifs = json?.data?.data;
+
   if (!gifs || gifs.length === 0) {
     throw new Error("No GIFs found");
   }
 
   const randomIndex = Math.floor(Math.random() * gifs.length);
-  const selected = gifs[randomIndex];
-
-  return selected.file.md.webp.url;
+  return gifs[randomIndex].file.md.gif.url;
 }
 
-/* -------------------- SNAP HANDLER -------------------- */
 registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
-  const url = new URL(ctx.request.url);
-  const base = url.origin;
-  const said = url.searchParams.get("said") === "1";
+  const base = new URL(ctx.request.url).origin;
+  const said = new URL(ctx.request.url).searchParams.get("said") === "1";
 
-  // Initial screen
-  if (ctx.action.type !== "post" || !said) {
+  try {
+    const gif = await fetchRandomGif();
+
     return {
       version: "1.0",
       theme: { accent: "amber" },
@@ -47,10 +44,11 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
             props: {
               direction: "vertical",
               gap: "md",
-              justify: "center",
               align: "center",
             },
-            children: ["title", "gmBtn"],
+            children: said
+              ? ["title", "gifImage", "btnRowAfter"]
+              : ["title", "gifImage", "btnBefore"],
           },
           title: {
             type: "text",
@@ -61,7 +59,14 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
               align: "center",
             },
           },
-          gmBtn: {
+          gifImage: {
+            type: "image",
+            props: {
+              src: gif,
+              aspectRatio: "1:1",
+            },
+          },
+          btnBefore: {
             type: "button",
             props: {
               label: "Say GM",
@@ -71,82 +76,48 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
               press: {
                 action: "submit",
                 params: {
-                  target: `${base}/gm?said=1`,
+                  target: `${base}/api/gmfarcaster?said=1`,
                 },
               },
             },
           },
-        },
-      },
-    };
-  }
-
-  // After clicking Say GM
-  try {
-    const gif = await fetchRandomGif();
-
-    const shareText = `GM Farcaster 🌞\n\nSnap by @weak`;
-
-    return {
-      version: "1.0",
-      theme: { accent: "amber" },
-      ui: {
-        root: "page",
-        elements: {
-          page: {
-            type: "stack",
-            props: {
-              direction: "vertical",
-              gap: "md",
-              justify: "center",
-              align: "center",
-            },
-            children: ["gifImage", "btnRow"],
-          },
-          gifImage: {
-            type: "image",
-            props: {
-              src: gif,
-              aspectRatio: "1:1",
-            },
-          },
-          btnRow: {
+          btnRowAfter: {
             type: "stack",
             props: {
               direction: "horizontal",
               gap: "sm",
               justify: "center",
             },
-            children: ["shareBtn", "againBtn"],
+            children: ["retryBtn", "shareBtn"],
+          },
+          retryBtn: {
+            type: "button",
+            props: {
+              label: "Retry",
+              variant: "primary",
+            },
+            on: {
+              press: {
+                action: "submit",
+                params: {
+                  target: `${base}/api/gmfarcaster?said=1`,
+                },
+              },
+            },
           },
           shareBtn: {
             type: "button",
             props: {
               label: "Share",
-              variant: "primary",
+              variant: "secondary",
               icon: "share",
             },
             on: {
               press: {
                 action: "compose_cast",
                 params: {
-                  text: shareText,
+                  text: `GM Farcaster 🌞/n/nGenerate yours here 👇/nhttps://snapapps.vercel.app/gmfarcaster`,
                   embeds: [gif],
-                },
-              },
-            },
-          },
-          againBtn: {
-            type: "button",
-            props: {
-              label: "Another GM",
-              variant: "secondary",
-            },
-            on: {
-              press: {
-                action: "submit",
-                params: {
-                  target: `${base}/gm?said=1`,
                 },
               },
             },
@@ -162,35 +133,10 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
         root: "page",
         elements: {
           page: {
-            type: "stack",
-            props: {
-              direction: "vertical",
-              gap: "md",
-              justify: "center",
-              align: "center",
-            },
-            children: ["errorText", "retryBtn"],
-          },
-          errorText: {
             type: "text",
             props: {
-              content: "Couldn't load GM GIF. Try again 🌞",
+              content: "Couldn't load GM GIF 🌞",
               align: "center",
-            },
-          },
-          retryBtn: {
-            type: "button",
-            props: {
-              label: "Retry",
-              variant: "primary",
-            },
-            on: {
-              press: {
-                action: "submit",
-                params: {
-                  target: `${base}/gm?said=1`,
-                },
-              },
             },
           },
         },
@@ -200,3 +146,4 @@ registerSnapHandler(app, async (ctx): Promise<SnapHandlerResult> => {
 });
 
 export default app;
+```
