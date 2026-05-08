@@ -35,6 +35,10 @@ app.get("/", (c) => {
       <span class="icon">👾</span>
       <div class="info"><h2>SnaPunks</h2><p>Claim your unique generative pixel punk art</p></div>
     </a>
+    <a class="card" href="/gmfarcaster">
+      <span class="icon">🌞</span>
+      <div class="info"><h2>GM Farcaster</h2><p>Satmy GM with random gif</p></div>
+    </a>
   </div>
   <footer>Made with 💜 by <a href="https://farcaster.xyz/weak" style="color:#a259ff">Weak</a></footer>
   
