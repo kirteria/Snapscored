@@ -5,7 +5,7 @@ import type { SnapHandlerResult } from "@farcaster/snap";
 const app = new Hono();
 
 async function fetchRandomGif(): Promise<string> {
-  const page = Math.floor(Math.random() * 200) + 1;
+  const page = Math.floor(Math.random() * 100) + 1;
 
   const res = await fetch(
     `https://api.klipy.com/api/v1/1voc5xDgnKY9i7T9sYDarp43PDCoqeEE1tS7Eaa7wBLciTgwsRk9eLCO0xtlozwS/gifs/search?q=GM&page=${page}&customer_id=snap`
